@@ -4,34 +4,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:onClick="publicarD1"
+    android:background="@color/cardview_light_background"
     tools:context=".MainActivity">
-
     <Button
-        android:id="@+id/btn_public"
-        android:layout_width="124dp"
-        android:layout_height="61dp"
-        android:onClick="publicarD1"
-        android:text="ON"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@color/cardview_dark_background"
+        android:id="@+id/btnguardar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="400dp"
+        android:textColor="@color/cardview_light_background"
+        android:onClick="Guardar"
+        android:text="Guardar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.243" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/boton_apagar"
-        android:layout_width="133dp"
-        android:layout_height="55dp"
-        android:onClick="publicarD2"
-        android:text="OFF"
-        tools:layout_editor_absoluteX="143dp"
-        tools:layout_editor_absoluteY="403dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+
+
+    <TextView
+        android:id="@+id/SensorText"
+        android:layout_width="159dp"
+        android:layout_height="88dp"
+        android:layout_marginTop="228dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:hint="0"
+        android:textSize="60dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.445"
+        app:layout_constraintHorizontal_bias="0.456"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.417" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+
+    <TextView
+        android:id="@+id/Textescrito"
+        android:layout_width="206dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="176dp"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:text="Humedad %"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

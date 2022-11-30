@@ -1,158 +1,175 @@
 package com.example.app_mqtt_conexion;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DownloadManager;
+import android.hardware.Sensor;
 import android.os.Bundle;
-import android.os.Build;//para obtener el nombre del dispositivo
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-
+import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.*;
+
 public class MainActivity extends AppCompatActivity {
-    String nombre_Dispositivo;   //string para obtener el nombre del dispositivo
-    String publicaste;                         //string para mostras el mensaje apublicar
-    boolean permiso_publicar=false;          //para permitir o no hacer publicaciones
-    boolean intento_publicar=false;           //para saber si intento publicar
-    //private TextView tvNombreDispositivo;      //TexView para monitorear
 
-    //parametros del broker la siguiente variable con el broker de shiftr.io
-    static String MQTTHOST = "tcp://68.183.119.177"; //el broker
-    //static String USERNAME = "accesobroker";          //el token de acceso
-    //static String PASSWORD = "zxcvbnmz";             //la contraceña del token
+    MqttAndroidClient client;
+    TextView Sensortext;
+    Button btnGuardar;
 
-    MqttAndroidClient client;              //  clienteMQTT este dispositivo
-    MqttConnectOptions options;            // para meter parametros a la conexion
-
-
-   @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//obtenemos el nombre del Dispositivo
-       //obtenemos el nombre del Dispositivo
-       obtener_nombre_Dispositivo();
-       //para conextar al broker   //generamos un clienteMQTT
-       String clientId = nombre_Dispositivo;//MqttClient.generateClientId();//noombre del celular
-       client = new MqttAndroidClient(this.getApplicationContext(), MQTTHOST, clientId);
-       //para agregar los parametros
-       options = new MqttConnectOptions();
-       //options.setUserName(USERNAME);
-       //options.setPassword(PASSWORD.toCharArray());
-       checar_conexion();//revisamos la conexion
-    }
-    private void obtener_nombre_Dispositivo() {
-        String fabricante = Build.MANUFACTURER;
-        String modelo = Build.MODEL;
-        nombre_Dispositivo=fabricante+" "+modelo;
-        //tvNombreDispositivo =(TextView) findViewById(R.id.tv_g);//para mostrar el modelo del celular
-        //tvNombreDispositivo.setText(nombre_Dispositivo);//para mostrar en el tv_g e modelo del celular
 
-    }
+        Sensortext = (TextView) findViewById(R.id.SensorText);
+        btnGuardar = findViewById(R.id.btnguardar);
 
-    public void conexionBroker() {
 
-        //para conextar al broker   //generamos un clienteMQTT
-        String clientId = nombre_Dispositivo; //MqttClient.generateClientId();//noombre del celular
-        client = new MqttAndroidClient(this.getApplicationContext(), MQTTHOST, clientId);
-        //para agregar los parametros
-        MqttConnectOptions options = new MqttConnectOptions();
-        //options.setUserName(USERNAME);
-        //options.setPassword(PASSWORD.toCharArray());
+        String clientId = MqttClient.generateClientId();
+        client = new MqttAndroidClient(this.getApplicationContext(), "tcp://broker.hivemq.com:1883", clientId);
+        //client = new MqttAndroidClient(this.getApplicationContext(), "tcp://192.168.43.41:1883",clientId);
+
         try {
-            IMqttToken token = client.connect(options);//intenta la conexion
+            IMqttToken token = client.connect();
             token.setActionCallback(new IMqttActionListener() {
-
-                @Override//metodo de conectado con exito
+                @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    // mensaje de conectado
-                    Toast.makeText(getBaseContext(), "Conectado ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Conectado ", Toast.LENGTH_LONG).show();
+                    setSubscription();
+
                 }
 
-                @Override//si falla la conexion
+                @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // mensaje de que no se conecto
-                    Toast.makeText(getBaseContext(), "NO Conectado ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Falla en la conexion", Toast.LENGTH_LONG).show();
                 }
-
-
             });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+        client.setCallback(new MqttCallback() {
+            @Override
+            public void connectionLost(Throwable cause) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                Sensortext.setText(new String(message.getPayload()));
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+
+            }
+        });
+
+
+        btnGuardar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                client.setCallback(new MqttCallback() {
+                    @Override
+                    public void connectionLost(Throwable cause) {
+
+                    }
+
+                    @Override
+                    public void messageArrived(String topic, MqttMessage message) throws Exception {
+                        StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://192.168.100.145/mqtt/guardar.php:443", new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                if (!response.isEmpty()) {
+                                    Toast.makeText(MainActivity.this, "dato guardado", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
+
+                            }
+                        }) {
+                            @NonNull
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> params = new HashMap<String, String>();
+                                if (Objects.equals(topic, "as/humedad")) {
+                                    Sensortext.setText(new String(message.getPayload()));
+                                    params.put("registro",Sensortext.getText().toString());
+                                }
+                                return params;
+                            }
+
+                        };
+
+
+                        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
+                        requestQueue.add(stringRequest);
+                    }
+
+                    @Override
+                    public void deliveryComplete(IMqttDeliveryToken token) {
+
+                    }
+                });
+            }
+
+        });
+
+
+    }
+    private void setSubscription () {
+
+        try {
+
+            client.subscribe("as/humedad", 0);
 
 
         } catch (MqttException e) {
             e.printStackTrace();
         }
-
-
-
-
-
-
+     }
     }
 
-    public  void checar_conexion(){
-//si el cliente esta desconectado se conecta falso=no conectado
-        if(!client.isConnected()) {
-            permiso_publicar=false;// no tienes permiso para publiar
-            conexionBroker();//intenta conectarce
-
-        }else{permiso_publicar=true;}//si puedes publicar
 
 
-    }
 
-    public  void  publicarD1 (View v) {
-        String tema="st";///corrrespode al tema de LED
-        String  menssage="ON";
-        publicaste= "publicaras " + tema + " " + menssage; //concatenamos el dato a publicar
-        intento_publicar=true;//si intento publicar
-        checar_conexion();//revisamos la conexion
 
-        if (permiso_publicar){
 
-            try {
-                int qos=0;//indica la prioridad del mensaje.
-                // 0:envio una vez,
-                // 1:se envia hasta garantizar la entrega en caso de fallo resive duplicados
-                //2: se  garantiza que se entrege al subcribtor unicamente una vez
-                //retenid=false;//true es que el mensaje se quede guardado en el broker asta su actualizacion
-                client.publish(tema, menssage.getBytes(),qos, false);
-                Toast.makeText(getBaseContext(), publicaste, Toast.LENGTH_SHORT).show();
-            }catch (Exception e){e.printStackTrace();}
-        }
 
-    }
-    public  void  publicarD2 (View v) {
-        String tema="st";///corrrespode al tema de LED
-        String  menssage="OFF";
-        publicaste= "publicaras " + tema + " " + menssage; //concatenamos el dato a publicar
-        intento_publicar=true;//si intento publicar
-        checar_conexion();//revisamos la conexion
 
-        if (permiso_publicar){
 
-            try {
-                int qos=0;//indica la prioridad del mensaje.
-                // 0:envio una vez,
-                // 1:se envia hasta garantizar la entrega en caso de fallo resive duplicados
-                //2: se  garantiza que se entrege al subcribtor unicamente una vez
-                //retenid=false;//true es que el mensaje se quede guardado en el broker asta su actualizacion
-                client.publish(tema, menssage.getBytes(),qos, false);
-                Toast.makeText(getBaseContext(), publicaste, Toast.LENGTH_SHORT).show();
-            }catch (Exception e){e.printStackTrace();}
-        }
 
-    }
 
-}
+
+
+
+
+
+
