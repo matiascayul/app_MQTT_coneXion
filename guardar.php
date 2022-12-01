@@ -3,7 +3,7 @@ include 'conexion.php';
 $registro = $_POST['registro'];
 
 $query = "INSERT INTO registrodb ('registro')values ('$registro')";
-$resultado =myqli_query($conexion,$query);
+$resultado =mysqli_query($conexion,$query);
 
 if($resultado){
 echo "Guardado";
