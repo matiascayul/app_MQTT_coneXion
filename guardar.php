@@ -2,7 +2,7 @@
 include 'conexion.php';
 $registro = $_POST['registro'];
 
-$query = "INSERT INTO registros ('registro')values ('$registro')";
+$query = "INSERT INTO registrodb ('registro')values ('$registro')";
 $resultado =myqli_query($conexion,$query);
 
 if(){
