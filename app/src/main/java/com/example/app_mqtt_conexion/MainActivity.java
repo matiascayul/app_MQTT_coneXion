@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void messageArrived(String topic, MqttMessage message) throws Exception {
-                        StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://192.168.100.145/mqtt/guardar.php:443", new Response.Listener<String>() {
+                        StringRequest stringRequest = new StringRequest(Request.Method.POST, "https://192.168.100.145/mqtt/guardar.php", new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
                                 if (!response.isEmpty()) {
