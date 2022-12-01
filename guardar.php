@@ -5,7 +5,7 @@ $registro = $_POST['registro'];
 $query = "INSERT INTO registrodb ('registro')values ('$registro')";
 $resultado =myqli_query($conexion,$query);
 
-if(){
+if($resultado){
 echo "Guardado";
 	
 }else{
