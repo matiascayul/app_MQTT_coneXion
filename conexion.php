@@ -4,7 +4,7 @@ $database = "s_humedad";
 $username"root";
 $password ="";
 
-$conexion= new mysqli ($host,$user,$password,$database);
+$conexion= new mysqli ($hostname,$username,$password,$database);
 if($conexion->connect_errno){
 	echo " no hay conexion";
 }
